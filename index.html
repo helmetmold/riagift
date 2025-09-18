@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Falling Food Frenzy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-area">
+            <div id="menu-screen" class="screen active">
+                <div class="menu-content">
+                    <h2>Welcome to Sofia's Food Frenzy!</h2>
+                    <p>Move left and right to catch the good food 🍎🍕🍔</p>
+                    <p>Avoid the bad food 🦴🗑️💀</p>
+                    <button id="play-button" class="game-button">Play Game</button>
+                    <button id="scores-button" class="game-button">High Scores</button>
+                </div>
+            </div>
+
+            <div id="game-screen" class="screen">
+                <div class="game-ui">
+                    <div class="ui-item">Score: <span id="current-score">0</span></div>
+                    <div class="ui-item">Level: <span id="current-level">1</span></div>
+                    <div class="ui-item">Lives: <span id="current-lives">3</span></div>
+                </div>
+                <canvas id="game-canvas"></canvas>
+                <div class="mobile-controls">
+                    <button id="move-left" class="mobile-button">◀ LEFT</button>
+                    <button id="move-right" class="mobile-button">RIGHT ▶</button>
+                </div>
+            </div>
+
+            <div id="gameover-screen" class="screen">
+                <div class="gameover-content">
+                    <h2>Game Over!</h2>
+                    <p>Final Score: <span id="final-score">0</span></p>
+                    <p>Level Reached: <span id="final-level">1</span></p>
+                    <div id="new-highscore" class="new-highscore hidden">
+                        <h3>🎉 New High Score! 🎉</h3>
+                        <input type="text" id="player-name" placeholder="Enter your name" maxlength="15">
+                        <button id="save-score" class="game-button">Save Score</button>
+                    </div>
+                    <button id="play-again-button" class="game-button">Play Again</button>
+                    <button id="menu-button" class="game-button">Main Menu</button>
+                </div>
+            </div>
+
+            <div id="scores-screen" class="screen">
+                <div class="scores-content">
+                    <h2>🏆 High Scores 🏆</h2>
+                    <div id="highscores-list"></div>
+                    <button id="back-to-menu" class="game-button">Back to Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
