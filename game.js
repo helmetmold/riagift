@@ -12,6 +12,10 @@ class FallingFoodGame {
         this.ctx = this.canvas.getContext('2d');
         this.gameState = GameStates.MENU;
         
+        // Detect version based on URL
+        this.version = this.detectVersion();
+        console.log(`🎮 Game version detected: ${this.version}`);
+        
         // Set proper canvas dimensions first
         this.initializeCanvas();
         
@@ -79,6 +83,31 @@ class FallingFoodGame {
         this.updateHighScoresDisplay();
     }
     
+    detectVersion() {
+        // Check URL path for version
+        const path = window.location.pathname.toLowerCase();
+        const search = window.location.search.toLowerCase();
+        const hash = window.location.hash.toLowerCase();
+        
+        console.log('Full URL:', window.location.href);
+        console.log('Pathname:', path);
+        console.log('Search:', search);
+        console.log('Hash:', hash);
+        
+        // Check multiple ways the version might be specified
+        if (path.includes('rhen') || search.includes('rhen') || hash.includes('rhen')) {
+            console.log('Detected RHEN version');
+            return 'rhen';
+        } else if (path.includes('sofia') || search.includes('sofia') || hash.includes('sofia')) {
+            console.log('Detected SOFIA version');
+            return 'sofia';
+        } else {
+            // Default to sofia for root or other paths
+            console.log('Using default SOFIA version');
+            return 'sofia';
+        }
+    }
+    
     initializeCanvas() {
         // Check if we're on mobile
         const isMobile = window.innerWidth <= 767;
@@ -97,6 +126,14 @@ class FallingFoodGame {
     }
     
     loadSprites() {
+        // Get version-specific folder names
+        const idleFolder = this.version === 'rhen' ? 'rhenidle' : 'idle';
+        const runningFolder = this.version === 'rhen' ? 'rhenRunning' : 'Running';
+        const eatFolder = this.version === 'rhen' ? 'rheneat' : 'eat';
+        const cryFolder = this.version === 'rhen' ? 'cryrhen' : 'cry';
+        
+        console.log(`Loading ${this.version} sprites from: ${idleFolder}, ${runningFolder}, ${eatFolder}, ${cryFolder}`);
+        
         // Load idle sprites
         let idleLoaded = 0;
         const idleTotal = 2;
@@ -108,11 +145,11 @@ class FallingFoodGame {
                     this.spritesLoaded.idle = true;
                 }
             };
-            img.src = `idle/frame-${i}.png`;
+            img.src = `${idleFolder}/frame-${i}.png`;
             this.sprites.idle.push(img);
         }
         
-        // Load walking sprites (using Running folder)
+        // Load walking sprites
         let walkingLoaded = 0;
         const walkingTotal = 6;
         for (let i = 1; i <= walkingTotal; i++) {
@@ -123,12 +160,17 @@ class FallingFoodGame {
                     this.spritesLoaded.walking = true;
                 }
             };
-            img.src = `Running/frame-${i}.1.png`;
+            // Use different naming convention for different versions
+            if (this.version === 'rhen') {
+                img.src = `${runningFolder}/frame-${i}.png`;
+            } else {
+                img.src = `${runningFolder}/frame-${i}.1.png`; // Sofia uses .1.png format
+            }
             this.sprites.walking.push(img);
         }
         
-         // Load single eating sprite
-         console.log('Loading single eating sprite...');
+         // Load eating sprite
+         console.log(`Loading ${this.version} eating sprite...`);
          const eatImg = new Image();
          eatImg.onload = () => {
              this.spritesLoaded.eat = true;
@@ -136,84 +178,110 @@ class FallingFoodGame {
              console.log(`Eating sprite dimensions: ${eatImg.width}x${eatImg.height}`);
          };
          eatImg.onerror = () => {
-             console.error('❌ FAILED to load eating sprite: eat/frame-1.png');
+             console.error(`❌ FAILED to load eating sprite: ${eatFolder}/frame-1.png`);
          };
-         eatImg.src = 'eat/frame-1.png';
+         eatImg.src = `${eatFolder}/frame-1.png`;
          this.sprites.eat.push(eatImg);
         
         // Load hit/cry sprites
         let hitLoaded = 0;
-        const hitTotal = 3; // frame-1.png, frame-2.png, frame 3.png
+        const hitTotal = this.version === 'rhen' ? 3 : 3; // Both versions have 3 frames
         
-        // Load frame-1.png and frame-2.png
-        for (let i = 1; i <= 2; i++) {
-            const img = new Image();
-            img.onload = () => {
+        console.log(`Loading ${this.version} cry sprites from ${cryFolder}`);
+        
+        if (this.version === 'rhen') {
+            // Rhen version: frame-1.png, frame-2.png, frame-3.png
+            for (let i = 1; i <= 3; i++) {
+                const img = new Image();
+                img.onload = () => {
+                    hitLoaded++;
+                    console.log(`Rhen cry sprite ${i} loaded (${hitLoaded}/${hitTotal})`);
+                    if (hitLoaded === hitTotal) {
+                        this.spritesLoaded.hit = true;
+                        console.log('All Rhen cry sprites loaded!');
+                    }
+                };
+                img.onerror = () => {
+                    console.log(`Failed to load Rhen cry sprite ${i}: ${cryFolder}/frame-${i}.png`);
+                };
+                img.src = `${cryFolder}/frame-${i}.png`;
+                this.sprites.hit.push(img);
+            }
+        } else {
+            // Sofia version: frame-1.png, frame-2.png, frame 3.png (note space in frame 3)
+            for (let i = 1; i <= 2; i++) {
+                const img = new Image();
+                img.onload = () => {
+                    hitLoaded++;
+                    console.log(`Sofia cry sprite ${i} loaded (${hitLoaded}/${hitTotal})`);
+                    if (hitLoaded === hitTotal) {
+                        this.spritesLoaded.hit = true;
+                        console.log('All Sofia cry sprites loaded!');
+                    }
+                };
+                img.onerror = () => {
+                    console.log(`Failed to load Sofia cry sprite ${i}: ${cryFolder}/frame-${i}.png`);
+                };
+                img.src = `${cryFolder}/frame-${i}.png`;
+                this.sprites.hit.push(img);
+            }
+            
+            // Load frame 3.png (note the space in filename for Sofia)
+            const img3 = new Image();
+            img3.onload = () => {
                 hitLoaded++;
-                console.log(`Cry sprite ${i} loaded (${hitLoaded}/${hitTotal})`);
+                console.log(`Sofia cry sprite 3 loaded (${hitLoaded}/${hitTotal})`);
                 if (hitLoaded === hitTotal) {
                     this.spritesLoaded.hit = true;
-                    console.log('All cry sprites loaded!');
+                    console.log('All Sofia cry sprites loaded!');
                 }
             };
-            img.onerror = () => {
-                console.log(`Failed to load cry sprite ${i}: cry/frame-${i}.png`);
+            img3.onerror = () => {
+                console.log('Failed to load Sofia cry sprite 3: cry/frame 3.png');
             };
-            img.src = `cry/frame-${i}.png`;
-            this.sprites.hit.push(img);
+            img3.src = `${cryFolder}/frame 3.png`;
+            this.sprites.hit.push(img3);
         }
-        
-        // Load frame 3.png (note the space in filename)
-        const img3 = new Image();
-        img3.onload = () => {
-            hitLoaded++;
-            console.log(`Cry sprite 3 loaded (${hitLoaded}/${hitTotal})`);
-            if (hitLoaded === hitTotal) {
-                this.spritesLoaded.hit = true;
-                console.log('All cry sprites loaded!');
-            }
-        };
-        img3.onerror = () => {
-            console.log('Failed to load cry sprite 3: cry/frame 3.png');
-        };
-        img3.src = `cry/frame 3.png`;
-        this.sprites.hit.push(img3);
     }
     
     loadFoodImages() {
-        console.log('Loading food images...');
+        // Get version-specific food folder names
+        const goodFoodFolder = this.version === 'rhen' ? 'rhengoodfood' : 'goodfood';
+        const badFoodFolder = this.version === 'rhen' ? 'rhenbadfood' : 'badfood';
         
+        console.log(`Loading ${this.version} food images from: ${goodFoodFolder}, ${badFoodFolder}`);
+
         // Load good food images
         let goodFoodLoaded = 0;
-        const goodFoodTotal = 3;
+        const goodFoodTotal = this.version === 'rhen' ? 3 : 3; // Both have 3 images
         for (let i = 1; i <= goodFoodTotal; i++) {
             const img = new Image();
             img.onload = () => {
                 goodFoodLoaded++;
-                console.log(`Good food ${i} loaded (${goodFoodLoaded}/${goodFoodTotal})`);
+                console.log(`${this.version} good food ${i} loaded (${goodFoodLoaded}/${goodFoodTotal})`);
                 this.checkAllFoodImagesLoaded();
             };
             img.onerror = () => {
-                console.error(`Failed to load good food ${i}: goodfood/good${i}.png`);
+                console.error(`Failed to load ${this.version} good food ${i}: ${goodFoodFolder}/good${i}.png`);
             };
-            img.src = `goodfood/good${i}.png`;
+            img.src = `${goodFoodFolder}/good${i}.png`;
             this.goodFoodImages.push(img);
         }
         
         // Load bad food images
         let badFoodLoaded = 0;
-        const badFoodTotal = 3;
+        const badFoodTotal = this.version === 'rhen' ? 1 : 3; // Rhen has 1, Sofia has 3
         for (let i = 1; i <= badFoodTotal; i++) {
             const img = new Image();
             img.onload = () => {
                 badFoodLoaded++;
-                console.log(`Bad food ${i} loaded (${badFoodLoaded}/${badFoodTotal})`);
+                console.log(`${this.version} bad food ${i} loaded (${badFoodLoaded}/${badFoodTotal})`);
                 this.checkAllFoodImagesLoaded();
             };
             img.onerror = () => {
-                console.error(`Failed to load bad food ${i}: badfood/bad${i}.png`);
+                console.error(`Failed to load ${this.version} bad food ${i}: ${badFoodFolder}/bad${i}.png`);
             };
-            img.src = `badfood/bad${i}.png`;
+            img.src = `${badFoodFolder}/bad${i}.png`;
             this.badFoodImages.push(img);
         }
     }

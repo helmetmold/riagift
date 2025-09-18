@@ -299,10 +299,8 @@ body {
     display: flex;
     justify-content: space-between;
     padding: 15px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     gap: 20px;
     z-index: 1000;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .mobile-button {
